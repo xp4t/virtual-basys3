@@ -1,0 +1,5 @@
+-e third_party/prjxray
+-e third_party/fasm2bels
+fasm==0.0.2.post88
+git+https://github.com/chipsalliance/f4pga-rr-graph.git@b8f0ebb6fd9842ae8bb7ff51a0adc5f76a853802
+git+https://github.com/chipsalliance/python-fpga-interchange.git@04a02101d1f7f03a2d33716192fb478e1e8605af

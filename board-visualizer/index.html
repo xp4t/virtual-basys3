@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Basys 3 · Virtual FPGA</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="Virtual FPGA home"><span class="chip-mark" aria-hidden="true">▦</span> VIRTUAL FPGA <span class="edition">LAB / 01</span></a>
+    <div class="connection"><span id="connection-dot" class="dot"></span><span id="connection">Connecting</span><code id="endpoint">127.0.0.1:2542</code></div>
+  </header>
+  <main>
+    <div class="page-heading">
+      <div><p class="eyebrow">YOUR BENCH, WITHOUT THE HARDWARE</p><h1>Basys 3<span class="title-dot">.</span></h1><p class="subtitle">Program in Vivado. Explore it here.</p></div>
+      <div class="part-tag"><span class="part-icon" aria-hidden="true">▦</span><div><span>ARTIX–7</span><strong>XC7A35T</strong></div><span class="tag-label">VIRTUAL TARGET</span></div>
+    </div>
+    <section class="workbench" aria-label="Virtual Basys3 workbench">
+      <div class="board-panel">
+        <div class="panel-heading"><span><span class="dot cyan"></span> BOARD VIEW</span><span class="small-label">DIGILENT BASYS 3</span></div>
+        <div class="board-stage">
+          <div id="board" class="board-photo">
+            <img src="/basys3.jpg" alt="Top-down photograph of the Digilent Basys3 board. Interactive switches are along the bottom and pushbuttons are on the right." draggable="false">
+            <div id="led-overlays" aria-label="On-board LED indicators"></div>
+            <div id="switch-overlays" aria-label="On-board switches"></div>
+            <div id="button-overlays" aria-label="On-board pushbuttons"></div>
+          </div>
+        </div>
+        <div class="board-help"><span class="hint-icon" aria-hidden="true">↖</span><span>Click a switch. Hold a button.<br><strong>The loaded design drives the LEDs.</strong></span><span class="photo-label">ACTUAL BOARD · INTERACTIVE I/O</span></div>
+        <div class="io-strip">
+          <div><span class="small-label">LED OUTPUT</span><div class="led-readout"><code id="led-hex">0x----</code><span id="led-bits" class="bit-readout">–––– –––– –––– ––––</span></div></div>
+          <div class="switch-readout"><span class="small-label">SWITCH INPUT</span><code id="switch-hex">0x0000</code></div>
+        </div>
+      </div>
+      <aside class="controls" aria-label="Simulation controls">
+        <div class="control-heading"><span class="small-label">SIMULATION</span><span id="status" class="status">WAITING</span></div>
+        <h2 id="design-title">Ready for your design</h2>
+        <p id="design-description" class="muted">Connect Vivado to the XVC target and program an Artix-7 bitstream to begin.</p>
+        <div class="transport"><button id="run" class="primary" disabled><span id="run-icon" aria-hidden="true">▶</span> <span id="run-label">Run</span></button><button id="step" class="secondary" disabled title="Advance one clock cycle">Step <span aria-hidden="true">↦</span></button></div>
+        <div class="rate-block"><label for="rate" class="small-label">SIMULATED CLOCK</label><div class="rate-value"><output id="rate-value" for="rate">32</output><span>Hz</span></div><input id="rate" type="range" min="0" max="4" step="1" value="1" aria-label="Simulated clock rate"><div class="range-labels"><span>1 Hz</span><span>1 kHz</span></div><p class="fine-print">Slowed down so you can see every change. The board’s physical clock is 100 MHz.</p></div>
+        <div class="metric"><span>Clock cycles</span><code id="cycles">0</code></div>
+        <div class="metric"><span>Active primitives</span><code id="cells">—</code></div>
+        <div class="configuration"><span class="small-label">CONFIGURATION</span><div class="configuration-line"><span id="configuration-dot" class="dot"></span><span id="configuration-text">Waiting for a bitstream</span></div><code id="fingerprint" title="SHA-256 of configuration received over JTAG">—</code></div>
+        <p id="error" role="alert" hidden></p>
+      </aside>
+    </section>
+    <section class="bench-notes" aria-label="Workbench information">
+      <div><span class="note-number">01</span><div><h3>Same Vivado workflow</h3><p>Connect to the XVC address and use Program Device.</p></div></div>
+      <div><span class="note-number">02</span><div><h3>Real configuration, simulated logic</h3><p>LUTs, registers and routing are reconstructed from your bitstream.</p></div></div>
+      <div><span class="note-number">03</span><div><h3>Your controls stay live</h3><p>The simulation keeps running after you close Vivado.</p></div></div>
+    </section>
+    <footer><span>VIRTUAL BASYS 3 <span class="footer-divider">/</span> LOCAL WORKBENCH</span><span>Zero-delay logic simulation · ILA / VIO not yet available</span></footer>
+  </main>
+</body>
+</html>

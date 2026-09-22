@@ -1,0 +1,13 @@
+__pycache__/
+.Xil/
+clockInfo.txt
+node_modules/
+.12ui/
+.venv/
+build/
+third_party/
+*.jou
+*.log
+*.str
+references/*.pdf
+references/ug470.txt

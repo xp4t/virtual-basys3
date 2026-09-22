@@ -1,0 +1,6 @@
+{
+  "name": "virtual-basys3-tests",
+  "private": true,
+  "scripts": {"test:board": "node board-visualizer/tests/browser.cjs"},
+  "devDependencies": {"playwright": "1.58.2"}
+}
