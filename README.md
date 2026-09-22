@@ -30,9 +30,11 @@ for example `source /tools/Xilinx/Vivado/2025.1/settings64.sh`.
 
 ## First-time setup
 
-Open a terminal in this repository and run:
+Open a terminal and run:
 
 ```sh
+git clone https://github.com/xp4t/virtual-basys3.git
+cd virtual-basys3
 bash scripts/setup_phase3.sh
 ```
 
