@@ -11,7 +11,7 @@ from tap import Instruction, State, Tap
 
 
 class DebugHubTest(unittest.TestCase):
-    def test_raw_oracle_activates_on_user_selection_and_skips_long_idle(self):
+    def test_raw_oracle_activates_on_user_selection_and_bounds_idle(self):
         class RawOracle:
             def __init__(self):
                 self.calls = []
@@ -44,7 +44,19 @@ class DebugHubTest(unittest.TestCase):
         # merely because USER1 remains the latched instruction.
         idle = [0] * 9000
         tap.shift(len(idle), packed(idle), packed(idle))
-        self.assertEqual(raw.calls, [len(tms)])
+        self.assertEqual(raw.calls, [len(tms), 64])
+
+        # Small XVC packets can also carry long idle delays. They must not
+        # defeat the idle bound when hw_server fragments a large delay.
+        tap.shift(1024, bytes(128), bytes(128))
+        self.assertEqual(raw.calls[-1], 64)
+
+        # A control transition at the end of a large vector cannot be dropped:
+        # the next vector may continue an IR/DR scan from SELECT_DR.
+        idle[-1] = 1
+        tap.shift(len(idle), packed(idle), bytes((len(idle) + 7) // 8))
+        self.assertEqual(raw.calls[-1], 9000)
+        self.assertEqual(tap.state, State.SELECT_DR)
 
     def test_verified_discovery_sequence_is_gated_by_configuration(self):
         configured = [False]

@@ -150,11 +150,11 @@ do this on a trusted network or behind a firewall.
 | Counter bitstream decoding and simulation | Working |
 | Browser-based Basys3 switches, buttons, and LEDs | Working |
 | General Artix-7 resource coverage | Partial |
-| ILA/VIO debugging in Hardware Manager | Experimental; not working end to end |
+| ILA/VIO debugging in Hardware Manager | Native XSI acceptance passing with matching `.bit`/`.ltx` files |
 
-ILA development is documented in
-[`debug-hub-emu/README.md`](debug-hub-emu/README.md). It is not required for the
-working counter and board-visualizer demo.
+Native ILA/VIO setup and tests using matching `.bit` and `.ltx` files are
+documented in [`debug-hub-emu/README.md`](debug-hub-emu/README.md). This XSI-based
+development flow is separate from the counter and board-visualizer demo.
 
 ## Tests and validation
 
@@ -171,6 +171,13 @@ Real Vivado acceptance scripts are also available:
 vivado -mode batch -source scripts/accept_phase1.tcl -log build/phase1.log
 vivado -mode batch -source scripts/accept_phase2.tcl -log build/phase2.log
 ```
+
+For native debug-core acceptance, build the matching XSI model as described in
+the debug guide, then run `python3 scripts/accept_phase5.py`. The test programs
+the design, validates its LTX probes, and checks captured counter data. The
+verified runs discovered one ILA with no VIO and one ILA with one VIO; both
+passed 1024-sample capture checks, and the VIO run passed reset, readback, hold,
+and enable checks. Logs are saved in each design's `acceptance/` directory.
 
 Reference documents and database provenance are listed in
 [`references/README.md`](references/README.md).

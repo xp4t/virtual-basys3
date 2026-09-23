@@ -104,7 +104,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=2542)
-    parser.add_argument("--max-bits", type=int, default=65536)
+    parser.add_argument("--max-bits", type=int,
+                        help="maximum XVC shift size (default: 1024 with XSI, otherwise 65536)")
     parser.add_argument("--trace", help="write raw XVC shifts to JSONL")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--phase", type=int, choices=(1, 2), default=2)
@@ -113,10 +114,15 @@ def main():
     parser.add_argument("--simulate", action="store_true", help="decode programmed fabric and serve the board companion")
     parser.add_argument("--board-port", type=int, default=8080)
     parser.add_argument("--debug-hub", action="store_true",
-                        help="enable the experimental USER1 Debug Hub discovery model")
+                        help="experimental USER1 discovery model only; no ILA capture or VIO")
     parser.add_argument("--debug-oracle-socket",
-                        help="development only: source USER-chain TDO from an XSI oracle")
+                        help="native ILA/VIO through a matching XSI model; see debug-hub-emu/README.md")
     args = parser.parse_args()
+    if args.max_bits is None:
+        # A native ILA register read exceeds 35,000 bits. RTL simulation can
+        # take longer than hw_server's XVC timeout for one such transaction.
+        # Let the client split it into bounded shifts, preserving TAP state.
+        args.max_bits = 1024 if args.debug_oracle_socket else 65536
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(name)s %(levelname)s %(message)s")
     with (open(args.trace, "a", encoding="utf-8") if args.trace else nullcontext()) as trace:

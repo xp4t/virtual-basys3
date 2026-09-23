@@ -165,6 +165,7 @@ class Tap:
             raise ValueError("vector lengths must equal ceil(count/8)")
         tdo = bytearray(size)
         raw_mask = bytearray(size)
+        initial_state = self.state
         configured = (self.config is not None and self.config.done)
         if not configured:
             self.raw_debug_active = False
@@ -188,9 +189,8 @@ class Tap:
             tdo[byte] |= local_tdo << bit
 
         # Configuration vectors can contain millions of bits and the local
-        # configuration model already handles them.  Forward short vectors to
-        # keep both TAPs synchronized, and forward a long vector only when it
-        # truly contains USER-chain DR bits (for example an ILA sample upload).
+        # configuration model already handles them. Once attached, preserve
+        # every control transition and USER scan, including fragmented scans.
         # The RTL TAP is initialized in Run-Test/Idle.  Delay attaching it
         # until Vivado actually selects a USER instruction; configuration
         # status traffic before that point is both irrelevant and can leave
@@ -198,7 +198,13 @@ class Tap:
         if raw_candidate and (self.raw_debug_active or selected_user):
             self.raw_debug_active = True
         if (raw_candidate and self.raw_debug_active
-                and (count <= 8192 or any(raw_mask))):
+                and initial_state == State.IDLE and not any(tms) and count > 64):
+            # Vivado emits long idle delays even when its XVC vectors are
+            # small. Advance the fabric a little for pending CDC/capture work
+            # without simulating every idle TCK. This leaves both TAPs in IDLE.
+            self.raw_debug.shift_vector(64, bytes(8), bytes(8))
+        elif (raw_candidate and self.raw_debug_active
+                and (count <= 8192 or any(raw_mask) or any(tms))):
             raw_tdo = self.raw_debug.shift_vector(count, tms, tdi)
             for byte in range(size):
                 tdo[byte] = ((tdo[byte] & ~raw_mask[byte]) |

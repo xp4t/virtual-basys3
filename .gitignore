@@ -1,13 +1,48 @@
+# Python caches and environments
 __pycache__/
-.Xil/
-clockInfo.txt
-node_modules/
-.12ui/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 .venv/
-build/
-third_party/
+venv/
+
+# Node.js dependencies and test output
+node_modules/
+playwright-report/
+test-results/
+
+# Vivado and FPGA build output
+.Xil/
 *.jou
 *.log
 *.str
+*.wdb
+*.vcd
+*.pb
+*.cache/
+*.runs/
+*.sim/
+*.hw/
+*.ip_user_files/
+*.gen/
+*.srcs/
+*.xpr.user
+clockInfo.txt
+build/
+
+# Downloaded/generated tool dependencies
+third_party/
+
+# Local editor and operating-system files
+.12ui/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Locally downloaded reference material
 references/*.pdf
 references/ug470.txt

@@ -82,10 +82,9 @@ int main(int argc, char **argv) {
     auto clock_bit = [&](bool tms_bit, bool tdi_bit) {
       sim.put_value(tms_port, tms_bit ? &one : &zero);
       sim.put_value(tdi_port, tdi_bit ? &one : &zero);
-      sim.run(45000);
-      sim.run(5000);
+      sim.run(20000);
       sim.put_value(tck_port, &one);
-      sim.run(50000);
+      sim.run(20000);
       sim.put_value(tck_port, &zero);
     };
     for (int cycle = 0; cycle < 6; ++cycle) clock_bit(true, false);
@@ -123,14 +122,17 @@ int main(int argc, char **argv) {
             bool tdi_bit = (tdi[bit / 8] >> (bit % 8)) & 1;
             sim.put_value(tms_port, tms_bit ? &one : &zero);
             sim.put_value(tdi_port, tdi_bit ? &one : &zero);
-            sim.run(45000);
+            // The fixture clock is 100 MHz. A 25 MHz JTAG clock leaves four
+            // fabric cycles per bit for the hub's CDC synchronizers while
+            // avoiding unnecessary gate-level simulation work.
+            sim.run(15000);
             s_xsi_vlog_logicval sampled = {0, 0};
             sim.get_value(tdo_port, &sampled);
             if ((sampled.bVal & 1) == 0 && (sampled.aVal & 1))
               tdo[bit / 8] |= static_cast<unsigned char>(1u << (bit % 8));
             sim.run(5000);
             sim.put_value(tck_port, &one);
-            sim.run(50000);
+            sim.run(20000);
             sim.put_value(tck_port, &zero);
           }
           write_exact(client, tdo.data(), size);
