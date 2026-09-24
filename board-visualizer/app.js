@@ -78,6 +78,7 @@ function render(next) {
   $('configuration-text').textContent = next.status==='ready' ? 'Programmed over JTAG' : next.status==='unconfigured' ? 'Waiting for a bitstream' : next.status==='error' ? 'Simulation unavailable' : 'Configuration in progress';
   $('fingerprint').textContent = next.sha256 ? next.sha256.slice(0,12)+'…' : '—';
   $('error').hidden = !next.error; $('error').textContent = next.error || '';
+  document.dispatchEvent(new CustomEvent('virtual-board-state', {detail:next}));
 }
 let controls = Promise.resolve();
 function control(command) {
@@ -88,6 +89,7 @@ function control(command) {
   }).catch(error => { $('error').hidden=false; $('error').textContent=error.message; });
   return controls;
 }
+window.boardControl = control;
 async function poll() {
   try { const response=await fetch('/api/state'); if (!response.ok) throw new Error('Connection unavailable'); render(await response.json()); }
   catch { $('connection').textContent='Companion disconnected'; $('connection-dot').classList.remove('live'); $('run').disabled=$('step').disabled=true; }

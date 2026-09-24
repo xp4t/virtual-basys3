@@ -10,6 +10,7 @@ from pathlib import Path
 
 from logic import Simulator
 from pins import BoardPins
+from analyzer import LogicAnalyzer
 
 ROOT = Path(__file__).resolve().parents[1]
 LOG = logging.getLogger("runtime")
@@ -25,6 +26,7 @@ class BoardRuntime:
         self.status = "unconfigured"
         self.error = None
         self.board = None
+        self.analyzer = None
         self.running = False
         self.rate = 32
         self.switches = [0] * 16
@@ -38,6 +40,7 @@ class BoardRuntime:
         with self.lock:
             self.generation += 1
             self.board = None
+            self.analyzer = None
             self.running = False
             self.status = "programming"
             self.error = None
@@ -75,6 +78,7 @@ class BoardRuntime:
                 self.board = board
                 simulator.drive({name: 0 for name, port in simulator.ports.items() if port["direction"] == "input"})
                 self.apply_inputs()
+                self.analyzer = LogicAnalyzer(board)
                 self.status = "ready"
                 self.error = None
                 self.source_hash = digest
@@ -88,6 +92,7 @@ class BoardRuntime:
                     self.error = str(error)
                     self.running = False
                     self.board = None
+                    self.analyzer = None
 
     def apply_inputs(self):
         if self.board:
@@ -96,10 +101,15 @@ class BoardRuntime:
     def control(self, command):
         if not isinstance(command, dict):
             raise ValueError("Control must be an object")
-        allowed = {"switch", "button", "value", "running", "rate", "step"}
+        allowed = {"switch", "switches", "button", "value", "running", "rate", "step"}
         if set(command) - allowed:
             raise ValueError("Unknown control")
         with self.lock:
+            if "switches" in command:
+                word = command["switches"]
+                if "switch" in command or type(word) is not int or not 0 <= word <= 0xFFFF:
+                    raise ValueError("Switches must be a 16-bit word, without an individual switch update")
+                self.switches = [(word >> index) & 1 for index in range(16)]
             if "switch" in command:
                 index = command["switch"]
                 if type(index) is not int or not 0 <= index < 16 or type(command.get("value")) is not bool:
@@ -128,7 +138,41 @@ class BoardRuntime:
                 self.running = False
                 for _ in range(command["step"]):
                     self.board.cycle()
+                    if self.analyzer:
+                        self.analyzer.sample()
             return self.snapshot()
+
+    def logic_catalog(self):
+        with self.lock:
+            return self.analyzer.probe_list() if self.analyzer else []
+
+    def logic_snapshot(self):
+        with self.lock:
+            return self.analyzer.state() if self.analyzer else None
+
+    def logic_control(self, command):
+        if not isinstance(command, dict) or set(command) - {"action", "probes", "depth", "trigger"}:
+            raise ValueError("Invalid analyzer command")
+        with self.lock:
+            if not self.analyzer:
+                raise ValueError("Program a supported design before using the analyzer")
+            action = command.get("action")
+            if action == "configure":
+                self.analyzer.configure(command.get("probes"), command.get("depth"),
+                                        command.get("trigger"))
+            elif action == "arm" and set(command) == {"action"}:
+                self.analyzer.arm()
+            elif action == "stop" and set(command) == {"action"}:
+                self.analyzer.stop()
+            else:
+                raise ValueError("Invalid analyzer action")
+            return self.analyzer.state()
+
+    def logic_csv(self):
+        with self.lock:
+            if not self.analyzer:
+                raise ValueError("No analyzer capture available")
+            return self.analyzer.csv_text()
 
     def snapshot(self):
         with self.lock:
@@ -156,6 +200,8 @@ class BoardRuntime:
                 try:
                     for _ in range(count):
                         self.board.cycle()
+                        if self.analyzer:
+                            self.analyzer.sample()
                 except Exception as error:
                     self.status = "error"
                     self.error = str(error)

@@ -5,11 +5,31 @@ of the matching counter design. The standalone `--debug-hub` option remains a
 limited discovery model: its hard-coded ILA metadata does not implement capture
 or VIO and should not be used for native debug acceptance.
 
+Vivado's Program Device dialog can choose any `.bit`/`.ltx` pair, but that does
+not make the virtual server simulate that pair's debug cores. XVC carries JTAG
+configuration and USER-chain scans; Vivado uses the LTX locally for probe
+labels. The virtual server must implement the programmed bitstream's debug hub,
+ILA, VIO, and fabric behavior before Hardware Manager can capture real data.
+
+An isolated 2025.1 check of `--debug-hub` with the matching VIO counter
+`.bit`/`.ltx` discovered one ILA and no VIO, and Vivado rejected the ILA
+mapping because its reported input width was 17 instead of eight. The older
+`~/Documents/virtual-basys3` checkout also labels ILA/VIO as experimental and
+not working end to end. The known-good XSI fixture below is a separate path.
+
 The bridge runs the actual generated Debug Hub, ILA and VIO logic. It is a
 Vivado-dependent development path, separate from the bitstream decoder and
 browser board simulator. It does not automatically turn arbitrary bitstreams
 into debug models. The supplied XSI top instantiates the `counter` fixture with
 its switch enable asserted and a 100 MHz fabric clock.
+
+For your own design on a physical Basys3, run
+`scripts/prepare_debug_session.py` from the directory containing its `.bit`
+and `.ltx` files; see the [main guide](../README.md#debugging-your-own-design).
+For a virtual target, those files alone do not provide the functional netlist
+that XSI executes. The bitstream-only decoder currently fails to reconstruct
+the supplied ILA/VIO design, so this XSI path remains limited to designs for
+which a matching functional model is available.
 
 ## Build and test with matching LTX files
 
@@ -78,10 +98,34 @@ results.
 
 ## Interactive debugging
 
-Start the bridge in its build directory:
+Start the matching debug stack in a terminal:
 
 ```sh
-cd build/debug_xsi
+python3 scripts/accept_phase5.py --interactive \
+  --design-dir build/debug_vio_counter --xsi-dir build/debug_vio_xsi \
+  --expected-vios 1
+```
+
+This checks that the `.bit`, `.ltx`, and XSI netlist match, then starts the XSI
+bridge, XVC on `2548`, and `hw_server` on `3127`. It prints Tcl commands that
+connect the virtual target. After connecting, use Vivado's **Program Device**
+dialog to select the matching `.bit` and `.ltx` yourself; the launcher does not
+set `PROGRAM.FILE` or `PROBES.FILE`. Keep the terminal open while using Hardware
+Manager; press Ctrl-C to stop the stack. For the ILA-only fixture, omit the
+design, XSI, and VIO arguments. The fixture does not currently drive the
+browser board GUI.
+
+The plain board simulator uses XVC `2542` and the default Vivado hardware server
+on `3121`. Its `--simulate` mode does not run the debug hub. For example, loading
+`build/debug_vio_counter/counter.ltx` while programming
+`build/counter/counter.bit` causes Vivado to report no debug hub and drop `ila0`
+and `vio0`, even though the LTX file itself is valid.
+
+To run the three native services manually, start the bridge in its build
+directory:
+
+```sh
+cd build/debug_vio_xsi
 LD_LIBRARY_PATH="$XILINX_VIVADO/lib/lnx64.o:$XILINX_VIVADO/lib/lnx64.o/Default" \
   ./xsi_bridge /tmp/fpga-sim-xsi.sock
 ```
@@ -89,7 +133,8 @@ LD_LIBRARY_PATH="$XILINX_VIVADO/lib/lnx64.o:$XILINX_VIVADO/lib/lnx64.o/Default" 
 From another terminal at the repository root, start XVC:
 
 ```sh
-python3 xvc-server/server.py --debug-oracle-socket /tmp/fpga-sim-xsi.sock
+python3 xvc-server/server.py --port 2548 \
+  --debug-oracle-socket /tmp/fpga-sim-xsi.sock
 ```
 
 Start the hardware server in a third terminal:
@@ -98,10 +143,9 @@ Start the hardware server in a third terminal:
 hw_server -s tcp::3127 -e 'set xvc-timeout 600'
 ```
 
-Connect Hardware Manager to `localhost:3127` and XVC `127.0.0.1:2542`. Program
-with the exact `counter.bit` and `counter.ltx` used to build that XSI model.
-For the combined fixture, run the bridge from `build/debug_vio_xsi` and select
-the files in `build/debug_vio_counter` instead.
+Connect Hardware Manager to `localhost:3127` and XVC `127.0.0.1:2548`. Program
+with `build/debug_vio_counter/counter.bit` and load
+`build/debug_vio_counter/counter.ltx`.
 
 Gate-level simulation can take longer than a hardware cable transaction.
 The XVC server therefore advertises 1024-bit transfers in XSI mode and bounds

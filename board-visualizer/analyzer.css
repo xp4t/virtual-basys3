@@ -1,0 +1,78 @@
+.logic-panel {
+  margin-top: 24px;
+  border: 1px solid #dce3df;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 10px 28px #233c4610;
+  overflow: hidden;
+}
+.logic-heading {
+  min-height: 68px;
+  padding: 17px 24px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.logic-heading h2 {
+  margin: 0 0 5px;
+  font: 650 11px/1.3 "SFMono-Regular",Consolas,monospace;
+  letter-spacing: 1.25px;
+}
+.logic-heading p {margin: 0 0 0 17px; color: #829198; font-size: 11px}
+.logic-phase {margin-left: 10px; padding: 3px 6px; border-radius: 3px; background: #eff2f0; color: #8c9a9c; font-size: 8px; letter-spacing: .5px; vertical-align: 1px}
+.logic-phase[data-phase="complete"] {background: #e7f4ec; color: #318462}
+.logic-phase[data-phase="waiting"], .logic-phase[data-phase="capturing"] {background: #e7f5f7; color: #168c9b}
+.logic-heading-meta {display: flex; align-items: center; gap: 18px; white-space: nowrap; font: 10px Consolas,monospace; color: #8a989d}
+.logic-heading-meta a {color: #168c9b; text-decoration: none}
+.logic-heading-meta a:hover {text-decoration: underline}
+#logic-error {margin: 0; padding: 10px 24px; background: #fdf0eb; color: #a84f39; font-size: 11px}
+.logic-columns {display: grid; grid-template-columns: minmax(210px, 235px) minmax(0, 1fr) minmax(205px, 235px); min-height: 300px}
+.logic-sidebar {padding: 20px 17px 17px 22px; min-width: 0; border-right: 1px solid var(--line)}
+.logic-section-title {display: flex; justify-content: space-between; gap: 8px; margin-bottom: 11px; font: 600 9px Consolas,monospace; letter-spacing: 1.25px; color: #697e86}
+.logic-section-title span:last-child:not(:first-child) {color: #9aa8aa}
+.logic-probe-list {max-height: 217px; overflow-y: auto; scrollbar-width: thin}
+.logic-probe {display: grid; grid-template-columns: 7px minmax(0, 1fr) auto 16px; gap: 6px; align-items: center; min-height: 26px; border-bottom: 1px solid #edf1ef; font: 10px Consolas,monospace}
+.logic-probe-dot {width: 6px; height: 6px; border-radius: 50%}
+.logic-probe-name {overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #35505c}
+.logic-probe-group {color: #9aa8aa; font-size: 8px; max-width: 44px; overflow: hidden; text-overflow: ellipsis}
+.logic-remove {background: none; border: 0; color: #a5b2b3; padding: 0; font-size: 15px; line-height: 1}
+.logic-remove:hover {color: #a84f39}
+.logic-search-label {display: block; margin: 15px 0 7px; font: 600 9px Consolas,monospace; letter-spacing: 1.15px; color: #879498}
+#logic-probe-search {width: 100%; height: 30px; padding: 0 9px; border: 1px solid #dce5e2; border-radius: 4px; background: #fbfcfb; color: #35505c; font-size: 11px}
+.logic-search-results {display: flex; gap: 5px; flex-wrap: wrap; max-height: 92px; overflow-y: auto; margin-top: 9px}
+.logic-result {padding: 4px 6px; background: #eef4f3; border: 1px solid #e4ece9; border-radius: 3px; color: #50717b; font: 9px Consolas,monospace; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap}
+.logic-result:hover {border-color: var(--cyan); color: #116c79}
+.logic-search-empty {font-size: 10px; color: #a2adad}
+.logic-center {padding: 14px 15px 10px; min-width: 0}
+.logic-toolbar {display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 9px; min-height: 36px}
+.logic-trigger,.logic-actions {display: flex; align-items: center; gap: 7px; min-width: 0}
+.logic-trigger {padding: 4px 8px; border: 1px solid #e2e9e6; border-radius: 4px}
+.logic-trigger .small-label,.logic-actions .small-label {font-size: 8px}
+.logic-on {color: #9aa7aa; font-size: 10px}
+.logic-toolbar select {height: 28px; max-width: 140px; padding: 0 6px; border: 1px solid #dce5e2; border-radius: 4px; background: #fff; color: #34535e; font-size: 10px}
+#logic-trigger-probe {max-width: 110px}
+#logic-depth {max-width: 70px}
+.logic-button {height: 30px; padding: 0 9px; border: 1px solid #dae4e2; border-radius: 4px; background: #fff; color: #45616b; white-space: nowrap; font-size: 10px; font-weight: 600}
+.logic-button:hover:enabled {border-color: var(--cyan); color: var(--cyan)}
+.logic-button.arm {background: #204453; border-color: #204453; color: #fff}
+.logic-button.arm:hover:enabled {background: #2b6675}
+.logic-button.stop {color: #a36756}
+.logic-waveform {min-height: 208px; max-height: 385px; overflow: auto; margin-top: 11px; border: 1px solid #edf1ef; border-radius: 3px; background: repeating-linear-gradient(90deg,#fff 0,#fff 49px,#f7faf8 49px,#f7faf8 50px)}
+.logic-waveform-empty {min-height: 208px; display: flex; align-items: center; justify-content: center; padding: 20px; color: #98a5a7; font-size: 11px; text-align: center}
+.logic-svg {display: block; max-width: none}
+.logic-caption {margin: 8px 0 0; color: #a1adaf; font-size: 9px; line-height: 1.5}
+.logic-vio {padding: 20px 22px; border-left: 1px solid var(--line); min-width: 0}
+.logic-vio p {margin: 0 0 20px; color: #839399; font-size: 10px; line-height: 1.6}
+.logic-vio label,.logic-vio-readout span {display: block; margin-bottom: 9px; color: #879498; font: 600 9px Consolas,monospace; letter-spacing: 1px}
+.logic-word-control {display: flex; gap: 6px}
+.logic-word-control input {min-width: 0; width: 100%; height: 34px; padding: 0 8px; border: 1px solid #dce5e2; border-radius: 4px; color: #294b58; font: 12px Consolas,monospace}
+.logic-word-control button {padding: 0 11px; border: 0; border-radius: 4px; background: #168c9b; color: #fff; font-size: 10px; font-weight: 600}
+.logic-word-control button:hover:enabled {background: #116c79}
+.logic-vio-readout {display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 22px; padding-top: 15px; border-top: 1px solid var(--line)}
+.logic-vio-readout span {margin: 0}
+.logic-vio-readout code {font-size: 14px; color: #294b58}
+.logic-vio .logic-vio-note {margin: 25px 0 0; color: #a0acae; font-size: 9px}
+@media (max-width: 1120px) {.logic-columns {grid-template-columns: 210px minmax(0,1fr)}.logic-vio {grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line)}.logic-vio p {margin-bottom: 12px}.logic-word-control {max-width: 300px}.logic-vio-readout {max-width: 300px; margin-top: 12px}.logic-vio .logic-vio-note {margin-top: 10px}}
+@media (max-width: 720px) {.logic-panel {margin-top: 18px}.logic-heading {padding: 16px 18px; align-items: flex-start}.logic-heading-meta {flex-direction: column; align-items: flex-end; gap: 5px; font-size: 9px}.logic-heading p {line-height: 1.4}.logic-columns {grid-template-columns: 1fr}.logic-sidebar {border-right: 0; border-bottom: 1px solid var(--line); padding: 17px 18px}.logic-probe-list {display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 12px; max-height: 140px}.logic-center {padding: 15px 12px}.logic-toolbar {align-items: flex-start}.logic-trigger {width: 100%; justify-content: flex-start}.logic-actions {flex-wrap: wrap}.logic-waveform {min-height: 210px}.logic-vio {grid-column: auto; padding: 18px}.logic-caption {font-size: 9px}}

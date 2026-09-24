@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Basys 3 · Virtual FPGA</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/analyzer.css">
   <script src="/app.js" defer></script>
+  <script src="/logic.js" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -46,12 +48,49 @@
         <p id="error" role="alert" hidden></p>
       </aside>
     </section>
+    <section class="logic-panel" aria-label="Local logic analyzer">
+      <div class="logic-heading">
+        <div><h2><span class="dot cyan" aria-hidden="true"></span> LOGIC ANALYZER <span id="logic-status" class="logic-phase">UNAVAILABLE</span></h2><p>Capture and inspect signals from the simulated design.</p></div>
+        <div class="logic-heading-meta"><span id="logic-sample-count">0 / 0 samples</span><a id="logic-csv" href="/api/logic.csv" download="virtual-basys3-capture.csv" hidden>Download CSV ↗</a></div>
+      </div>
+      <p id="logic-error" role="alert" hidden></p>
+      <div class="logic-columns">
+        <div class="logic-sidebar">
+          <div class="logic-section-title"><span>PROBES</span><span id="logic-probe-count">0 / 16</span></div>
+          <div id="logic-probes" class="logic-probe-list" aria-label="Selected probes"></div>
+          <label class="logic-search-label" for="logic-probe-search">ADD A SIGNAL</label>
+          <input id="logic-probe-search" type="search" placeholder="Search decoded nets…" autocomplete="off" disabled>
+          <div id="logic-search-results" class="logic-search-results" aria-label="Available signals"></div>
+        </div>
+        <div class="logic-center">
+          <div class="logic-toolbar">
+            <div class="logic-trigger">
+              <span class="small-label">TRIGGER</span>
+              <select id="logic-trigger-mode" aria-label="Trigger mode"><option value="immediate">Immediate</option><option value="rising">Rising edge</option><option value="falling">Falling edge</option><option value="high">High level</option><option value="low">Low level</option></select>
+              <span class="logic-on">on</span>
+              <select id="logic-trigger-probe" aria-label="Trigger signal" disabled></select>
+            </div>
+            <div class="logic-actions"><label for="logic-depth" class="small-label">SAMPLES</label><select id="logic-depth" aria-label="Capture depth"><option>16</option><option>32</option><option selected>128</option><option>256</option><option>512</option><option>1024</option><option>2048</option><option>4096</option></select><button id="logic-arm" class="logic-button arm" disabled>◎ Arm</button><button id="logic-capture" class="logic-button" disabled>◉ Capture now</button><button id="logic-stop" class="logic-button stop" disabled>Stop</button></div>
+          </div>
+          <div id="logic-waveform" class="logic-waveform" aria-live="polite"></div>
+          <p class="logic-caption">Software capture of decoded pins, registers and physical nets · one sample per simulated clock cycle</p>
+        </div>
+        <div class="logic-vio">
+          <div class="logic-section-title"><span>VIRTUAL INPUTS</span></div>
+          <p>Set all 16 board switches at once, or use the switches on the board.</p>
+          <label for="vio-word">SWITCHES · HEX</label>
+          <div class="logic-word-control"><input id="vio-word" type="text" inputmode="text" spellcheck="false" maxlength="6" value="0x0000" aria-label="16-bit switch word"><button id="vio-apply" disabled>Apply</button></div>
+          <div class="logic-vio-readout"><span>LED OUTPUT</span><code id="vio-led-word">0x----</code></div>
+          <p class="logic-vio-note">Inputs reach the virtual board fabric. Signal labels come from the decoder; an LTX file is not required here.</p>
+        </div>
+      </div>
+    </section>
     <section class="bench-notes" aria-label="Workbench information">
       <div><span class="note-number">01</span><div><h3>Same Vivado workflow</h3><p>Connect to the XVC address and use Program Device.</p></div></div>
       <div><span class="note-number">02</span><div><h3>Real configuration, simulated logic</h3><p>LUTs, registers and routing are reconstructed from your bitstream.</p></div></div>
       <div><span class="note-number">03</span><div><h3>Your controls stay live</h3><p>The simulation keeps running after you close Vivado.</p></div></div>
     </section>
-    <footer><span>VIRTUAL BASYS 3 <span class="footer-divider">/</span> LOCAL WORKBENCH</span><span>Zero-delay logic simulation · ILA / VIO not yet available</span></footer>
+    <footer><span>VIRTUAL BASYS 3 <span class="footer-divider">/</span> LOCAL WORKBENCH</span><span>Zero-delay logic simulation · Local signal capture</span></footer>
   </main>
 </body>
 </html>

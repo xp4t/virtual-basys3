@@ -30,6 +30,12 @@ def wait_for_socket(process, address, family=socket.AF_INET):
 
 
 def main():
+    # Ensure externally stopped interactive sessions still run the cleanup
+    # block that terminates the bridge, XVC, and hw_server process groups.
+    def stop_session(_signum, _frame):
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGTERM, stop_session)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--design-dir", type=Path, default=ROOT / "build/debug_counter")
     parser.add_argument("--xsi-dir", type=Path, default=ROOT / "build/debug_xsi")
@@ -38,6 +44,8 @@ def main():
     parser.add_argument("--xvc-port", type=int, default=2548)
     parser.add_argument("--hw-port", type=int, default=3127)
     parser.add_argument("--expected-vios", type=int, choices=(0, 1), default=0)
+    parser.add_argument("--interactive", action="store_true",
+                        help="keep the matching XSI/XVC/hw_server stack running for Vivado GUI")
     args = parser.parse_args()
     design, xsi, vivado = (path.resolve() for path in
                            (args.design_dir, args.xsi_dir, args.vivado_root))
@@ -50,7 +58,7 @@ def main():
     for port in (args.xvc_port, args.hw_port):
         with socket.socket() as probe:
             probe.bind(("127.0.0.1", port))
-    logs = design / "acceptance"
+    logs = design / ("interactive" if args.interactive else "acceptance")
     logs.mkdir(exist_ok=True)
     processes, outputs = [], []
 
@@ -78,6 +86,28 @@ def main():
             hardware = start([str(vivado / "bin/hw_server"), "-s", f"tcp::{args.hw_port}",
                               "-e", "set xvc-timeout 600"], "hw-server.log")
             wait_for_socket(hardware, ("127.0.0.1", args.hw_port))
+            if args.interactive:
+                print(f"DEBUG_STACK_READY: hw_server=127.0.0.1:{args.hw_port} "
+                      f"xvc=127.0.0.1:{args.xvc_port}", flush=True)
+                print("In Vivado's Tcl console, connect the virtual target:", flush=True)
+                print("  open_hw_manager", flush=True)
+                print(f"  set ::env(HW_SERVER_URL) {{TCP:127.0.0.1:{args.hw_port}}}",
+                      flush=True)
+                print(f"  source {{{ROOT / 'scripts/connect_xvc.tcl'}}}", flush=True)
+                print(f"  connect_virtual_target 127.0.0.1:{args.xvc_port}", flush=True)
+                print("Then use Vivado's Program Device dialog to choose:", flush=True)
+                print(f"  BIT: {design / 'counter.bit'}", flush=True)
+                print(f"  LTX: {design / 'counter.ltx'}", flush=True)
+                print("The files are chosen in Vivado; this launcher only starts the matching fixture model.", flush=True)
+                print("Keep this terminal open; press Ctrl-C to stop the stack.", flush=True)
+                try:
+                    while all(process.poll() is None for process in (bridge, server, hardware)):
+                        time.sleep(0.5)
+                except KeyboardInterrupt:
+                    pass
+                else:
+                    raise RuntimeError(f"Debug service exited; check {logs}")
+                return
             env.update(XVC_URL=f"127.0.0.1:{args.xvc_port}",
                        HW_SERVER_URL=f"127.0.0.1:{args.hw_port}",
                        DEBUG_DESIGN_DIR=str(design), EXPECTED_ILAS="1",

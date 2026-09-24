@@ -8,11 +8,16 @@ __pycache__/
 htmlcov/
 .venv/
 venv/
+.eggs/
+*.egg-info/
+dist/
 
 # Node.js dependencies and test output
 node_modules/
 playwright-report/
 test-results/
+coverage/
+.nyc_output/
 
 # Vivado and FPGA build output
 .Xil/
@@ -30,6 +35,13 @@ test-results/
 *.gen/
 *.srcs/
 *.xpr.user
+*.bit
+*.ltx
+*.dcp
+*.fasm
+*.rpt
+*.wcfg
+*.jsonl
 clockInfo.txt
 build/
 
@@ -38,8 +50,11 @@ third_party/
 
 # Local editor and operating-system files
 .12ui/
+.idea/
+.vscode/
 .DS_Store
 Thumbs.db
+desktop.ini
 *.swp
 *.swo
 

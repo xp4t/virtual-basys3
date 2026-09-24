@@ -1,6 +1,9 @@
 set root [file normalize [file join [file dirname [info script]] ..]]
-set endpoint "127.0.0.1:2542"
+set endpoint "127.0.0.1:2548"
 if {[info exists ::env(XVC_URL)]} { set endpoint $::env(XVC_URL) }
+if {![info exists ::env(HW_SERVER_URL)]} {
+    set ::env(HW_SERVER_URL) "TCP:127.0.0.1:3127"
+}
 set design_dir [file join $root build debug_counter]
 if {[info exists ::env(DEBUG_DESIGN_DIR)]} { set design_dir [file normalize $::env(DEBUG_DESIGN_DIR)] }
 set bit_file [file join $design_dir counter.bit]
