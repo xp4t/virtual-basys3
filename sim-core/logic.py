@@ -15,7 +15,9 @@ class UnsupportedDesign(ValueError):
 
 def parameter(cell, name, default=0):
     value = cell.get("parameters", {}).get(name)
-    return int(value, 2) if value is not None else default
+    if value is None:
+        return default
+    return value if isinstance(value, int) else int(value, 2)
 
 
 def invert(value, flag):

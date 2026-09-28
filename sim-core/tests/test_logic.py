@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from logic import Simulator, UnsupportedDesign
+from logic import Simulator, UnsupportedDesign, parameter
 from pins import parse_xdc
 
 
@@ -14,6 +14,15 @@ def flop(q, d, clk=2):
 
 
 class LogicTests(unittest.TestCase):
+    def test_numeric_and_binary_string_parameters(self):
+        self.assertEqual(parameter({"parameters": {"INIT": 2}}, "INIT"), 2)
+        self.assertEqual(parameter({"parameters": {"INIT": "10"}}, "INIT"), 2)
+        self.assertEqual(parameter({}, "INIT", 1), 1)
+        cell = flop(6, 5)
+        cell["parameters"]["INIT"] = 1
+        simulator = Simulator({"cells": {"register": cell}})
+        self.assertEqual(simulator.values[6], 1)
+
     def chain(self):
         return Simulator({"ports":{"clk":{"direction":"input","bits":[2]},
                                    "enable":{"direction":"input","bits":[3]},
