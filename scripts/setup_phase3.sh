@@ -26,6 +26,9 @@ if [ ! -d .venv ]; then python3 -m venv .venv; fi
 .venv/bin/pip install 'Cython==0.29.37' pkgconfig setuptools_scm
 # The interchange dependency pins pycapnp 1.1.0. It requires Cython 0.29,
 # so build it explicitly outside pip's otherwise incompatible isolated environment.
-.venv/bin/pip install --no-build-isolation 'pycapnp==1.1.0'
+# Its bundled Cap'n Proto project also declares a pre-3.5 CMake policy baseline,
+# which CMake 4 no longer accepts unless the compatibility floor is explicit.
+CMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    .venv/bin/pip install --no-build-isolation 'pycapnp==1.1.0'
 .venv/bin/pip install -r bitstream-decode/requirements.txt
 .venv/bin/pip check
